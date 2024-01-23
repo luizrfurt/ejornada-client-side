@@ -22,12 +22,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/",
-    "/card/:path*",
-    "/home/:path*",
-    "/me/:path*",
-    "/notification/:path*",
-    "/setting/:path*",
-  ],
+  matcher: ["/", "/home/:path*", "/card/:path*"],
 };

@@ -50,7 +50,7 @@ const Home: React.FC = () => {
             <table className="w-full sm:w-auto table-auto">
               <tbody>
                 <tr>
-                  <td className="border px-4 py-2">Name</td>
+                  <td className="border px-4 py-2">Nome</td>
                   <td className="border px-4 py-2">{user.name}</td>
                 </tr>
                 <tr>
