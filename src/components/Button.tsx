@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`text-white font-bold py-2 px-4 rounded ${getButtonColorClass()}`}
+      className={`text-white font-bold py-2 px-4 rounded w-full ${getButtonColorClass()}`}
       onClick={onClick}
     >
       {children}

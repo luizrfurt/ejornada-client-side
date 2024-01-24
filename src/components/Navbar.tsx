@@ -9,9 +9,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   return (
     <div className="flex justify-between items-center bg-gray-800 p-4">
       <h1 className="text-white text-2xl font-bold">Home</h1>
-      <Button onClick={onLogout} color="red">
-        Sair
-      </Button>
+      <div>
+        <Button onClick={onLogout} color="red">
+          Sair
+        </Button>
+      </div>
     </div>
   );
 };
