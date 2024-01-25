@@ -8,16 +8,16 @@ export const loginUser = async (email: string, password: string) => {
       password,
     });
 
+    console.log(response);
+
     if (response.data.status != "success") {
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error("Erro de autenticação:", error);
-    throw new Error(
-      "Ocorreu um erro durante o processo de login. Por favor, tente novamente."
-    );
+    console.error("Erro: ", error);
+    return false;
   }
 };
 
@@ -26,14 +26,39 @@ export const logoutUser = async () => {
   try {
     const response = await axiosInstance.post("/auth/logout", null);
 
-    if (response.status != 200) {
+    if (response.data.status != "success") {
       return false;
     }
 
     return true;
-  } catch (error: any) {
-    console.error("Erro ao fazer logout:", error);
-    alert("Logout inválido: " + error);
+  } catch (error) {
+    console.error("Erro: ", error);
+    return false;
+  }
+};
+
+// Register
+export const registerUser = async (
+  name: string,
+  email: string,
+  password: string,
+  passwordConfirm: string
+) => {
+  try {
+    const response = await axiosInstance.post("/auth/register", {
+      name,
+      email,
+      password,
+      passwordConfirm,
+    });
+
+    if (response.data.status != "success") {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Erro: ", error);
     return false;
   }
 };
