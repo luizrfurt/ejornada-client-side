@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { Button, Card, Label, TextInput, Spinner, Toast } from "flowbite-react"; // Import Spinner from flowbite-react
+import { HiMail } from "react-icons/hi";
+import { TextInput, Label, Button, Card, Spinner } from "flowbite-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { loginUser } from "@/services/AuthService";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import notifyMessage from "@/utils/NotifyMessage";
+import InputPassword from "@/components/InputPassword";
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -11,14 +16,25 @@ const Login: React.FC = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleLogin = async () => {
     try {
       setIsLoading(true);
+
+      if (emailError) {
+        notifyMessage(0, "Por favor, insira um endereço de email válido.");
+        return;
+      }
       const response = await loginUser(loginData.email, loginData.password);
 
-      if (!response) {
-        alert("Erro ao logar");
+      if (response.status !== 200) {
+        notifyMessage(0, response.data.message);
       } else {
         router.push("/home");
       }
@@ -35,10 +51,29 @@ const Login: React.FC = () => {
       ...prevLoginData,
       [name]: value,
     }));
+    if (name === "email") {
+      setEmailError(
+        value.trim() !== "" && !isValidEmail(value)
+          ? "Por favor, insira um endereço de email válido."
+          : null
+      );
+    }
   };
+
+  const handleBlurEmail = () => {
+    setEmailError(
+      loginData.email.trim() !== "" && !isValidEmail(loginData.email)
+        ? "Por favor, insira um endereço de email válido."
+        : null
+    );
+  };
+
+  const isButtonDisabled =
+    !loginData.email || !loginData.password || !!emailError;
 
   return (
     <div className="flex items-center justify-center h-screen">
+      <ToastContainer />
       <Card className="p-6 max-w-md w-full">
         <div className="flex items-center justify-center mb-4">
           <img src="./img/logo.png" className="w-1/3" alt="Logo" />
@@ -47,26 +82,33 @@ const Login: React.FC = () => {
           <div className="mb-2 block">
             <Label htmlFor="email" value="Email" />
             <TextInput
+              icon={HiMail}
               id="email"
               type="email"
               name="email"
               value={loginData.email}
               onChange={handleInputChange}
+              onBlur={handleBlurEmail}
               required
+              shadow
             />
+            {emailError && (
+              <span className="text-red-500 text-sm">{emailError}</span>
+            )}
           </div>
-          <div className="mb-2 block">
-            <Label htmlFor="password" value="Senha" />
-            <TextInput
-              id="password"
-              type="password"
-              name="password"
-              value={loginData.password}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <Button color="success" type="button" onClick={handleLogin}>
+          <InputPassword
+            id="password"
+            name="password"
+            label="Senha"
+            value={loginData.password}
+            handleInputChange={handleInputChange}
+          />
+          <Button
+            disabled={isButtonDisabled}
+            color="success"
+            type="button"
+            onClick={handleLogin}
+          >
             {isLoading ? <Spinner size="sm" /> : "Entrar"}
           </Button>
           <Label htmlFor="agree" className="flex">

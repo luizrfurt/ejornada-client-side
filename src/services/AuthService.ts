@@ -8,16 +8,10 @@ export const loginUser = async (email: string, password: string) => {
       password,
     });
 
-    console.log(response);
-
-    if (response.data.status != "success") {
-      return false;
-    }
-
-    return true;
-  } catch (error) {
+    return response;
+  } catch (error: any) {
     console.error("Erro: ", error);
-    return false;
+    return error.response;
   }
 };
 
@@ -26,14 +20,10 @@ export const logoutUser = async () => {
   try {
     const response = await axiosInstance.post("/auth/logout", null);
 
-    if (response.data.status != "success") {
-      return false;
-    }
-
-    return true;
-  } catch (error) {
+    return response;
+  } catch (error: any) {
     console.error("Erro: ", error);
-    return false;
+    return error.response;
   }
 };
 
@@ -52,13 +42,9 @@ export const registerUser = async (
       passwordConfirm,
     });
 
-    if (response.data.status != "success") {
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Erro: ", error);
-    return false;
+    return response;
+  } catch (error: any) {
+    console.error("Erro: ", error.response);
+    return error.response;
   }
 };

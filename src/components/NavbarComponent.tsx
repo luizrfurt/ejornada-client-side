@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Dropdown,
@@ -13,12 +13,44 @@ import {
 } from "flowbite-react";
 import { logoutUser } from "@/services/AuthService";
 import router from "next/router";
+import { userData } from "@/services/UserService";
+import notifyMessage from "@/utils/NotifyMessage";
 
 const NavbarComponent: React.FC = () => {
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    handleMe();
+  }, []);
+
+  const handleMe = async () => {
+    try {
+      // Faça a chamada Axios aqui
+      const response = await userData();
+      setUser({
+        name: response.data.user.name,
+        email: response.data.user.email,
+      });
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
   const logout = async () => {
     try {
       // Faça a chamada Axios aqui
       const response = await logoutUser();
+
+      if (response.status != 200) {
+        notifyMessage(0, response.data.message);
+      } else {
+        notifyMessage(1, response.data.message);
+        router.push("/");
+      }
+
       router.push("/");
     } catch (error) {
       console.error("Erro: ", error);
@@ -26,7 +58,7 @@ const NavbarComponent: React.FC = () => {
   };
 
   return (
-    <Navbar fluid rounded>
+    <Navbar fluid rounded className="bg-slate-200">
       <NavbarBrand href="">
         <img
           src="./img/logo.png"
@@ -47,9 +79,9 @@ const NavbarComponent: React.FC = () => {
           }
         >
           <DropdownHeader>
-            <span className="block text-sm">Bonnie Green</span>
+            <span className="block text-sm">{user.name}</span>
             <span className="block truncate text-sm font-medium">
-              name@flowbite.com
+              {user.email}
             </span>
           </DropdownHeader>
           <DropdownItem>Configurações</DropdownItem>
@@ -62,10 +94,10 @@ const NavbarComponent: React.FC = () => {
         <NavbarLink href="#" active>
           Home
         </NavbarLink>
-        <NavbarLink href="#">About</NavbarLink>
-        <NavbarLink href="#">Services</NavbarLink>
-        <NavbarLink href="#">Pricing</NavbarLink>
-        <NavbarLink href="#">Contact</NavbarLink>
+        <NavbarLink href="#">Sobre</NavbarLink>
+        <NavbarLink href="#">Planos</NavbarLink>
+        <NavbarLink href="#">Contato</NavbarLink>
+        <NavbarLink href="/test">Testes</NavbarLink>
       </NavbarCollapse>
     </Navbar>
   );
