@@ -18,7 +18,6 @@ type RegisterData = {
 
 const Register: React.FC = () => {
   const router = useRouter();
-  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [registerData, setRegisterData] = useState<RegisterData>({
     name: "",
     email: "",
@@ -26,6 +25,7 @@ const Register: React.FC = () => {
     passwordConfirm: "",
   });
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordConfirmError, setPasswordConfirmError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const isValidEmail = (email: string): boolean => {
@@ -59,10 +59,6 @@ const Register: React.FC = () => {
   const handleRegister = async () => {
     try {
       setIsLoading(true);
-      if (emailError) {
-        notifyMessage(0, "Por favor, insira um endereço de email válido.");
-        return;
-      }
 
       const response = await registerUser(
         registerData.name,
@@ -71,7 +67,7 @@ const Register: React.FC = () => {
         registerData.passwordConfirm
       );
 
-      if (response.status != 201) {
+      if (response.status !== 201) {
         notifyMessage(0, response.data.message);
       } else {
         handleLogin();
@@ -83,18 +79,25 @@ const Register: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setRegisterData((prevLoginData) => ({
-      ...prevLoginData,
-      [name]: value,
-    }));
     if (name === "email") {
       setEmailError(
         value.trim() !== "" && !isValidEmail(value)
           ? "Por favor, insira um endereço de email válido."
           : null
       );
+    } else if (name === "passwordConfirm") {
+      setPasswordConfirmError(
+        registerData.password !== value ? "As senhas não coincidem." : ""
+      );
     }
+    
+    // Atualiza o estado com as alterações do usuário
+    setRegisterData({
+      ...registerData,
+      [name]: value // Atualiza o campo correspondente no estado
+    });
   };
+  
 
   const handleBlurEmail = () => {
     setEmailError(
@@ -109,7 +112,8 @@ const Register: React.FC = () => {
     !registerData.email ||
     !registerData.password ||
     !registerData.passwordConfirm ||
-    !!emailError;
+    !!emailError ||
+    !!passwordConfirmError;
 
   return (
     <div className="flex items-center justify-center h-screen">
@@ -119,12 +123,12 @@ const Register: React.FC = () => {
           <img src="./img/logo.png" className="w-1/3" alt="Logo" />
         </div>
         <form className="flex flex-col gap-4">
-          <div className="mb-2 block ">
+          <div className="mb-2 block">
             <Label htmlFor="name" value="Nome" />
             <TextInput
               icon={HiOutlineUserCircle}
               id="name"
-              type="name"
+              type="text"
               name="name"
               value={registerData.name}
               onChange={handleInputChange}
@@ -166,17 +170,11 @@ const Register: React.FC = () => {
                   label="Confirmação de senha"
                   value={registerData.passwordConfirm}
                   handleInputChange={handleInputChange}
+                  error={passwordConfirmError}
                 />
               </div>
             </div>
           </div>
-          {errorMessages.length > 0 && (
-            <div className="mb-2 text-red-600 dark:text-red-500">
-              {errorMessages.map((notifyError, index) => (
-                <p key={index}>{notifyError}</p>
-              ))}
-            </div>
-          )}
           <Button
             disabled={isButtonDisabled}
             color="success"
