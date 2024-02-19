@@ -5,8 +5,6 @@ const Home: React.FC = () => {
   return (
     <div>
       <NavbarComponent />
-      <div>
-      </div>
     </div>
   );
 };

@@ -1,13 +1,11 @@
-import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { Button, Card, Label, TextInput, Spinner } from "flowbite-react"; // Import Spinner from flowbite-react
+import { Button, Card, Label, TextInput, Spinner } from "flowbite-react";
 import Link from "next/link";
 import { ToastContainer } from "react-toastify";
 import { HiMail } from "react-icons/hi";
 import notifyMessage from "@/utils/NotifyMessage";
 
 const PasswordReset: React.FC = () => {
-  const router = useRouter();
   const [reset, setReset] = useState({
     email: "",
   });

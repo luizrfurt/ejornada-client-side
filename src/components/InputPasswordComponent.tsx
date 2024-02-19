@@ -2,20 +2,22 @@ import React, { useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { TextInput } from "flowbite-react";
 
-interface InputPasswordProps {
+interface Props {
   id: string;
   name: string;
   label: string;
   value: string;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
 }
 
-const InputPassword: React.FC<InputPasswordProps> = ({
+const InputPasswordComponent: React.FC<Props> = ({
   id,
   name,
   label,
   value,
   handleInputChange,
+  error, 
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,9 +35,14 @@ const InputPassword: React.FC<InputPasswordProps> = ({
         type={showPassword ? "text" : "password"}
         placeholder=""
         onChange={handleInputChange}
-        className="rounded-md focus:outline-none focus:ring focus:border-blue-500"
+        className={`rounded-md focus:outline-none focus:ring ${
+          error ? 'border-red-500' : 'border-gray-300'
+        }`}
         required
       />
+      {error && (
+        <span className="text-red-500 text-sm absolute top-full left-0">{error}</span>
+      )}
       <div
         className="absolute inset-y-0 right-0.5 flex items-center pr-3 cursor-pointer pt-5"
         onClick={toggleShowPassword}
@@ -50,4 +57,4 @@ const InputPassword: React.FC<InputPasswordProps> = ({
   );
 };
 
-export default InputPassword;
+export default InputPasswordComponent;

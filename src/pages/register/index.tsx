@@ -7,18 +7,11 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import notifyMessage from "@/utils/NotifyMessage";
 import { HiMail, HiOutlineUserCircle } from "react-icons/hi";
-import InputPassword from "@/components/InputPassword";
-
-type RegisterData = {
-  name: string;
-  email: string;
-  password: string;
-  passwordConfirm: string;
-};
+import InputPasswordComponent from "@/components/InputPasswordComponent";
 
 const Register: React.FC = () => {
   const router = useRouter();
-  const [registerData, setRegisterData] = useState<RegisterData>({
+  const [registerData, setRegisterData] = useState({
     name: "",
     email: "",
     password: "",
@@ -90,14 +83,12 @@ const Register: React.FC = () => {
         registerData.password !== value ? "As senhas não coincidem." : ""
       );
     }
-    
-    // Atualiza o estado com as alterações do usuário
+
     setRegisterData({
       ...registerData,
-      [name]: value // Atualiza o campo correspondente no estado
+      [name]: value,
     });
   };
-  
 
   const handleBlurEmail = () => {
     setEmailError(
@@ -135,7 +126,7 @@ const Register: React.FC = () => {
               required
             />
           </div>
-          <div className="mb-2 block">
+          <div className="mb-2 block" style={{ position: "relative" }}>
             <Label htmlFor="email" value="Email" />
             <TextInput
               icon={HiMail}
@@ -146,16 +137,21 @@ const Register: React.FC = () => {
               onChange={handleInputChange}
               onBlur={handleBlurEmail}
               required
-              shadow
             />
             {emailError && (
-              <span className="text-red-500 text-sm">{emailError}</span>
+              <span
+                className="text-red-500 text-sm"
+                style={{ position: "absolute", bottom: "-1.5rem" }}
+              >
+                {emailError}
+              </span>
             )}
           </div>
+
           <div>
             <div className="mb-2 block">
               <div className="mb-4">
-                <InputPassword
+                <InputPasswordComponent
                   id="password"
                   name="password"
                   label="Senha"
@@ -164,7 +160,7 @@ const Register: React.FC = () => {
                 />
               </div>
               <div>
-                <InputPassword
+                <InputPasswordComponent
                   id="passwordConfirm"
                   name="passwordConfirm"
                   label="Confirmação de senha"

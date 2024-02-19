@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { loginUser } from "@/services/AuthService";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import notifyMessage from "@/utils/NotifyMessage";
-import InputPassword from "@/components/InputPassword";
+import InputPasswordComponent from "@/components/InputPasswordComponent";
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -96,7 +95,7 @@ const Login: React.FC = () => {
               <span className="text-red-500 text-sm">{emailError}</span>
             )}
           </div>
-          <InputPassword
+          <InputPasswordComponent
             id="password"
             name="password"
             label="Senha"
