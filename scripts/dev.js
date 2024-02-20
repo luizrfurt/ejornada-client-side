@@ -14,5 +14,7 @@ app.prepare().then(() => {
   }).listen(port, (err) => {
     if (err) throw err;
     console.log(`> Ready on http://localhost:${port}`);
+    const nextVersion = require("next/package.json").version;
+    console.log(`🛆  Next.js version: ${nextVersion}`);
   });
 });
