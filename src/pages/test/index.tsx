@@ -1,30 +1,28 @@
-import React, { useState } from "react";
+import React from 'react';
 
-const PhoneInput: React.FC = () => {
-  const [phone, setPhone] = useState<string>("");
+const test: React.FC = () => {
+  const data = [
+    ['Mês', 'Vendas'],
+    ['Janeiro', 1000],
+    ['Fevereiro', 1500],
+    ['Março', 1200],
+    ['Abril', 1300],
+    ['Maio', 1700],
+    ['Junho', 1400],
+  ];
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.replace(/\D/g, "");
-    if (value.length <= 11) {
-      setPhone(value);
-    }
+  const options = {
+    title: 'Vendas por mês',
+    hAxis: { title: 'Mês', titleTextStyle: { color: '#333' } },
+    vAxis: { minValue: 0 },
+    legend: { position: 'none' },
   };
 
   return (
-    <div className="flowbite m-4">
-      <label htmlFor="phone" className="block text-gray-700">Telefone:</label>
-      <input
-        type="text"
-        id="phone"
-        name="phone"
-        value={phone}
-        onChange={handleChange}
-        placeholder="Digite seu telefone"
-        className="form-input mt-1 block w-full"
-      />
-      <p className="text-red-500">{phone.length < 10 ? "O telefone deve ter pelo menos 10 dígitos" : null}</p>
+    <div>
+      <h1>Seu gráfico de barras</h1>
     </div>
   );
 };
 
-export default PhoneInput;
+export default test;

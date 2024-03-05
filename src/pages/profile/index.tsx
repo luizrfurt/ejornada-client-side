@@ -1,15 +1,24 @@
+import React, { useEffect, useState } from "react";
 import {
   saveUserData,
   userData,
   updateUserPhoto,
 } from "@/services/UserService";
 import NavbarComponent from "@/components/NavbarComponent";
-import { Button, Card, Label, Spinner, TextInput } from "flowbite-react";
-import React, { useEffect, useState } from "react";
+import SidebarComponent from "@/components/SideBarComponent";
+import { Button, Label, Spinner, TextInput } from "flowbite-react";
 import InputCpfComponent from "@/components/InputCpfComponent";
 import InputPhoneComponent from "@/components/InputPhoneComponent";
 import ProfileImageComponent from "@/components/ProfileImageComponent";
 import notifyMessage from "@/utils/NotifyMessage";
+import { Tabs } from "flowbite-react";
+import {
+  HiOfficeBuilding,
+  HiUserCircle,
+  HiBookmarkAlt,
+  HiUser,
+} from "react-icons/hi";
+import InputCNPJComponent from "@/components/InputCNPJComponent";
 
 const Profile: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +27,13 @@ const Profile: React.FC = () => {
     email: "",
     cpf: "",
     phone: "",
+    fantasyName: "",
+    companyName: "",
+    cnpj: "",
   });
   const [isCpfValid, setIsCpfValid] = useState<boolean>(true);
   const [isPhoneValid, setIsPhoneValid] = useState<boolean>(true);
-
+  const [isCNPJValid, setIsCNPJValid] = useState<boolean>(true);
   const [photoChanged, setPhotoChanged] = useState<boolean>(false);
   const [defaultPhoto, setDefaultPhoto] = useState<boolean>(false);
   const [photoBase64, setPhotoBase64] = useState<string>("");
@@ -39,12 +51,15 @@ const Profile: React.FC = () => {
         email: response.email,
         cpf: response.cpf,
         phone: response.phone,
+        fantasyName: "",
+        companyName: "",
+        cnpj: "",
       });
 
       setPhotoProfile(response.photo);
       setDefaultPhoto(
         response.photo ===
-          "https://frot4.s3.sa-east-1.amazonaws.com/profiles/default-profile-picture.jpeg"
+          "https://ejornada.s3.sa-east-1.amazonaws.com/profiles/default-profile-picture.jpeg"
       );
     } catch (error) {
       console.error("Erro:", error);
@@ -67,6 +82,11 @@ const Profile: React.FC = () => {
   const handlePhoneChange = (value: string, isValid: boolean) => {
     setUser({ ...user, phone: value });
     setIsPhoneValid(isValid);
+  };
+
+  const handleCNPJChange = (value: string, isValid: boolean) => {
+    setUser({ ...user, cnpj: value });
+    setIsCNPJValid(isValid);
   };
 
   const handleProfileImageChange = (
@@ -99,7 +119,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  const isButtonDisabled =
+  const isButtonDisabledProfile =
     !user.name ||
     !user.email ||
     !user.cpf ||
@@ -107,62 +127,121 @@ const Profile: React.FC = () => {
     !isCpfValid ||
     !isPhoneValid;
 
+  const isButtonDisabledCompany = !isCNPJValid;
+
   return (
-    <div>
-      <NavbarComponent />
-      <div className="flex justify-center mt-4">
-        <Card className="p-6 max-w-md w-full">
-          <div className="flex items-center justify-center">
-            <ProfileImageComponent
-              photo={photoProfile}
-              onChange={handleProfileImageChange}
-            />
-          </div>
-          <div>
-            <Label htmlFor="name">Nome</Label>
-            <TextInput
-              value={user.name}
-              name="name"
-              id="name"
-              type="text"
-              onChange={handleInputChange}
-              className="mb-4"
-            />
-            <Label htmlFor="email">Email</Label>
-            <TextInput
-              value={user.email}
-              name="email"
-              id="email"
-              type="email"
-              onChange={handleInputChange}
-              className="mb-4"
-            />
-            <div className="flex mb-4">
-              <div className="w-1/2 mr-2">
-                <Label htmlFor="cpf">CPF</Label>
-                <InputCpfComponent
-                  value={user.cpf}
-                  onChange={handleCpfChange}
+    <div className="flex">
+      <div style={{ flex: "0 300px" }}>
+        <NavbarComponent />
+        <SidebarComponent />
+      </div>
+      <div>
+        <Tabs
+          aria-label="Tabs with underline"
+          className="place-items-start pt-9"
+        >
+          <Tabs.Item title="Perfil" icon={HiUserCircle}>
+            <div>
+              <ProfileImageComponent
+                photo={photoProfile}
+                onChange={handleProfileImageChange}
+              />
+              <div>
+                <Label htmlFor="name">Nome</Label>
+                <TextInput
+                  value={user.name}
+                  name="name"
+                  id="name"
+                  type="text"
+                  onChange={handleInputChange}
+                  className="mb-4"
                 />
-              </div>
-              <div className="w-1/2 ml-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <InputPhoneComponent
-                  value={user.phone}
-                  onChange={handlePhoneChange}
+                <Label htmlFor="email">Email</Label>
+                <TextInput
+                  value={user.email}
+                  name="email"
+                  id="email"
+                  type="email"
+                  onChange={handleInputChange}
+                  className="mb-4"
                 />
+                <div className="mb-4">
+                  <Label htmlFor="cpf">CPF</Label>
+                  <InputCpfComponent
+                    value={user.cpf}
+                    onChange={handleCpfChange}
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="phone">Telefone</Label>
+                  <InputPhoneComponent
+                    value={user.phone}
+                    onChange={handlePhoneChange}
+                  />
+                </div>
+                <div style={{ display: "flex", justifyContent: "end" }}>
+                  <Button
+                    disabled={isButtonDisabledProfile}
+                    color="success"
+                    type="button"
+                    onClick={handleSave}
+                    size="md"
+                  >
+                    {isLoading ? <Spinner size="sm" /> : "Salvar"}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <Button
-            disabled={isButtonDisabled}
-            color="success"
-            type="button"
-            onClick={handleSave}
-          >
-            {isLoading ? <Spinner size="sm" /> : "Salvar"}
-          </Button>
-        </Card>
+          </Tabs.Item>
+          <Tabs.Item title="Minha empresa" icon={HiOfficeBuilding}>
+            <div
+              style={{
+                maxHeight: "calc(100vh - 120px)",
+                overflowY: "auto",
+                paddingRight: "20px",
+              }}
+            >
+              <div>
+                <Label htmlFor="fantasyName">Nome fantasia</Label>
+                <TextInput
+                  icon={HiUser}
+                  name="fantasyName"
+                  id="fantasyName"
+                  type="text"
+                  onChange={handleInputChange}
+                  className="mb-4"
+                />
+                <Label htmlFor="companyName">Razão social</Label>
+                <TextInput
+                  icon={HiBookmarkAlt}
+                  name="companyName"
+                  id="companyName"
+                  type="text"
+                  onChange={handleInputChange}
+                  className="mb-4"
+                />
+                <div className="mb-6">
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <InputCNPJComponent
+                    value={user.cnpj}
+                    onChange={handleCNPJChange}
+                  />
+                </div>
+                <div style={{ display: "flex", justifyContent: "end" }}>
+                  <Button
+                    disabled={isButtonDisabledCompany}
+                    color="success"
+                    type="button"
+                    onClick={handleSave}
+                    size="md"
+                  >
+                    {isLoading ? <Spinner size="sm" /> : "Salvar"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Tabs.Item>
+        </Tabs>
       </div>
     </div>
   );

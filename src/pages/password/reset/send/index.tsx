@@ -1,49 +1,62 @@
-import React, { useState } from "react";
-import { Button, Card, Label, TextInput, Spinner } from "flowbite-react";
-import Link from "next/link";
-import { ToastContainer } from "react-toastify";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { passwordResetVerifyToken, passwordReset } from "../../../../services/PasswordResetService";
+import { Button, Card, Label, Spinner, TextInput } from "flowbite-react";
 import { HiMail } from "react-icons/hi";
 import notifyMessage from "@/utils/NotifyMessage";
 
-const PasswordReset: React.FC = () => {
-  const [reset, setReset] = useState({
-    email: "",
-  });
+const ResetPassword = () => {
+  const router = useRouter();
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailFound, setEmailFound] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [isSending, setIsSending] = useState(false);
+  useEffect(() => {
+    async function verifyToken() {
+      const { token } = router.query;
+      try {
+        setLoading(true);
+        const result = await passwordResetVerifyToken(token);
+        if (result.status === 200) {
+          setEmailFound(true);
+        }
+      } catch (error) {
+        console.error("Erro ao mandar email:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (router.query.token) {
+      verifyToken();
+    }
+  }, [router.query]);
+
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = async () => {
+    try {
+      setIsLoading(true);
+      const response = await passwordReset();
+      if (response.status !== 200) {
+        notifyMessage(0, response.data.message);
+      } else {
+        notifyMessage(1, "Email de verificação reenviado com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao reenviar o email de verificação:", error);
+      notifyMessage(0, "Erro ao reenviar o email de verificação.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSend = async () => {
-    try {
-      setIsSending(true);
-      const response = { status: 200, message: "Email enviado com sucesso!" };
-      if (emailError) {
-        notifyMessage(0, "Por favor, insira um endereço de email válido.");
-        return;
-      }
-      if (response.status != 200) {
-        notifyMessage(0, response.message);
-      } else {
-        notifyMessage(1, response.message);
-      }
-    } catch (error) {
-      console.error("Erro: ", error);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setReset((prevLoginData) => ({
-      ...prevLoginData,
-      [name]: value,
-    }));
     if (name === "email") {
       setEmailError(
         value.trim() !== "" && !isValidEmail(value)
@@ -52,60 +65,53 @@ const PasswordReset: React.FC = () => {
       );
     }
   };
-  const handleBlurEmail = () => {
-    setEmailError(
-      reset.email.trim() !== "" && !isValidEmail(reset.email)
-        ? "Por favor, insira um endereço de email válido."
-        : null
-    );
-  };
 
-  const isButtonDisabled = !reset.email;
-
+  const isButtonDisabled = !!emailError;
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <ToastContainer />
-      <Card className="p-6 max-w-md w-full">
-        <div className="flex items-center justify-center mb-4">
-          <img src="../.././img/logo.png" className="w-1/3" alt="Logo" />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-md p-6">
+        <div className="flex items-center justify-center mb-2">
+          <img src="/img/logo.png" className="w-1/2" alt="Logo" />
         </div>
-        <form className="flex flex-col gap-4">
-        <div className="mb-2 block">
-            <Label htmlFor="email" value="Email" />
-            <TextInput
-              icon={HiMail}
-              id="email"
-              type="email"
-              name="email"
-              value={reset.email}
-              onChange={handleInputChange}
-              onBlur={handleBlurEmail}
-              required
-              shadow
-            />
-            {emailError && (
-              <span className="text-red-500 text-sm">{emailError}</span>
-            )}
-          </div>
+        <div className="flex items-center justify-center mb-3">
+          <p className="text-xl font-bold">Redefinição de senha</p>
+        </div>
+        <div className="mb-2 block" style={{ position: "relative" }}>
+          <Label htmlFor="email" value="Email" />
+          <TextInput
+            icon={HiMail}
+            id="email"
+            type="email"
+            name="email"
+            onChange={handleInputChange}
+            required
+          />
+          {emailError && (
+            <span
+              className="text-red-500 text-sm"
+              style={{ position: "absolute", bottom: "-1.5rem" }}
+            >
+              {emailError}
+            </span>
+          )}
+        </div>
+        <div>
           <Button
-            disabled={isButtonDisabled}
             color="success"
+            href=""
+            disabled={isButtonDisabled}
             type="button"
-            onClick={handleSend}
+            className="mt-3"
+            onClick={handleClick}
           >
-            {isSending ? <Spinner size="sm" /> : "Enviar"}
+            {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
+            Enviar
           </Button>
-          <Label htmlFor="agree" className="flex">
-            Já possui conta?&nbsp;
-            <Link href="/" className="text-blue-600 dark:text-blue-500">
-              Entrar
-            </Link>
-          </Label>
-        </form>
+        </div>
       </Card>
     </div>
   );
 };
 
-export default PasswordReset;
+export default ResetPassword;

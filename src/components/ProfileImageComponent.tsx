@@ -15,7 +15,7 @@ const ProfileImageComponent: React.FC<Props> = ({ photo, onChange }) => {
   const [isDefaultPhoto, setIsDefaultPhoto] = useState<boolean>(true);
   const [photoBase64String, setPhotoBase64String] = useState<string>("");
   const urlDefaultPhoto =
-    "https://frot4.s3.sa-east-1.amazonaws.com/profiles/default-profile-picture.jpeg";
+    "https://ejornada.s3.sa-east-1.amazonaws.com/profiles/default-profile-picture.jpeg";
   const [photoSource, setPhotoSource] = useState<string>(urlDefaultPhoto);
   const [showDeleteButton, setShowDeleteButton] = useState<boolean>(false);
 

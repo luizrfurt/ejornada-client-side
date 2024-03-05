@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export default function middleware(request: NextRequest) {
-  const logged_in = request.cookies.get("logged_in")?.value;
+  const loggedIn = request.cookies.get("loggedIn")?.value;
 
   const signInUrl = new URL("/", request.url);
   const home = new URL("/home", request.url);
 
-  if (!logged_in) {
+  if (!loggedIn) {
     if (request.nextUrl.pathname === "/") {
       return NextResponse.next();
     }
