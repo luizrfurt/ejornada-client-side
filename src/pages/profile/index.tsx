@@ -1,43 +1,47 @@
 import React, { useEffect, useState } from "react";
-import {
-  saveUserData,
-  userData,
-  updateUserPhoto,
-} from "@/services/UserService";
+import { savePassword, saveUserData, userData } from "@/services/UserService";
 import NavbarComponent from "@/components/NavbarComponent";
-import SidebarComponent from "@/components/SideBarComponent";
+import SidebarComponent from "@/components/SidebarComponent";
 import { Button, Label, Spinner, TextInput } from "flowbite-react";
 import InputCpfComponent from "@/components/InputCpfComponent";
 import InputPhoneComponent from "@/components/InputPhoneComponent";
-import ProfileImageComponent from "@/components/ProfileImageComponent";
-import notifyMessage from "@/utils/NotifyMessage";
+import ProfileImageComponent from "@/components/ImageProfileComponent";
+import ToastComponent from "@/components/ToastComponent";
 import { Tabs } from "flowbite-react";
-import {
-  HiOfficeBuilding,
-  HiUserCircle,
-  HiBookmarkAlt,
-  HiUser,
-} from "react-icons/hi";
-import InputCNPJComponent from "@/components/InputCNPJComponent";
+import { HiUserCircle, HiLockClosed } from "react-icons/hi";
+import InputPasswordComponent from "@/components/InputPasswordComponent";
 
 const Profile: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState({
+    id: "",
     name: "",
     email: "",
     cpf: "",
     phone: "",
-    fantasyName: "",
-    companyName: "",
-    cnpj: "",
+    login: "",
+    photo: "",
+    master: false,
+    leader: false,
   });
+  const [password, setPassword] = useState<string>("");
   const [isCpfValid, setIsCpfValid] = useState<boolean>(true);
   const [isPhoneValid, setIsPhoneValid] = useState<boolean>(true);
-  const [isCNPJValid, setIsCNPJValid] = useState<boolean>(true);
   const [photoChanged, setPhotoChanged] = useState<boolean>(false);
   const [defaultPhoto, setDefaultPhoto] = useState<boolean>(false);
   const [photoBase64, setPhotoBase64] = useState<string>("");
   const [photoProfile, setPhotoProfile] = useState<string>("");
+  const [passwordConfirmError, setPasswordConfirmError] = useState<string>("");
+  const [passwordConfirm, setPasswordConfirm] = useState<string>("");
+  const [showToast, setShowToast] = useState<{
+    show: boolean;
+    type: boolean;
+    message: string;
+  }>({ show: false, type: false, message: "" });
+
+  const handleCloseToast = () => {
+    setShowToast({ ...showToast, show: false });
+  };
 
   useEffect(() => {
     handleMe();
@@ -47,13 +51,15 @@ const Profile: React.FC = () => {
     try {
       const response = await userData();
       setUser({
+        id: response.id,
         name: response.name,
         email: response.email,
         cpf: response.cpf,
         phone: response.phone,
-        fantasyName: "",
-        companyName: "",
-        cnpj: "",
+        master: response.master,
+        photo: response.photo,
+        login: response.login,
+        leader: response.leader,
       });
 
       setPhotoProfile(response.photo);
@@ -74,6 +80,18 @@ const Profile: React.FC = () => {
     });
   };
 
+  const handlePasswordChange = (e: any) => {
+    const { name, value } = e.target;
+    if (name === "password") {
+      setPassword(value);
+    } else if (name === "passwordConfirm") {
+      setPasswordConfirm(value);
+      setPasswordConfirmError(
+        password !== value ? "As senhas não coincidem." : ""
+      );
+    }
+  };
+
   const handleCpfChange = (value: string, isValid: boolean) => {
     setUser({ ...user, cpf: value });
     setIsCpfValid(isValid);
@@ -82,11 +100,6 @@ const Profile: React.FC = () => {
   const handlePhoneChange = (value: string, isValid: boolean) => {
     setUser({ ...user, phone: value });
     setIsPhoneValid(isValid);
-  };
-
-  const handleCNPJChange = (value: string, isValid: boolean) => {
-    setUser({ ...user, cnpj: value });
-    setIsCNPJValid(isValid);
   };
 
   const handleProfileImageChange = (
@@ -102,15 +115,50 @@ const Profile: React.FC = () => {
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      const response = await saveUserData(user);
+      console.log(user);
       if (photoChanged) {
-        const responsePhoto = await updateUserPhoto(defaultPhoto, photoBase64);
+        user.photo = photoBase64;
       }
+      const response = await saveUserData(user.id, user);
 
       if (response.status !== 200) {
-        notifyMessage(0, "Falha ao atualizar dados!");
+        setShowToast({
+          show: true,
+          type: false,
+          message: "Falha ao atualizar dados!",
+        });
       } else {
-        notifyMessage(1, "Dados salvos com sucesso!");
+        setShowToast({
+          show: true,
+          type: true,
+          message: "Dados salvos com sucesso!",
+        });
+
+        console.log(response.data.user[0].photo);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar os dados:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    try {
+      setIsLoading(true);
+      const response = await savePassword(password, passwordConfirm, user.id);
+      if (response.status !== 200) {
+        setShowToast({
+          show: true,
+          type: false,
+          message: "Falha ao atualizar a senha!",
+        });
+      } else {
+        setShowToast({
+          show: true,
+          type: true,
+          message: "Senha alterada com sucesso!",
+        });
       }
     } catch (error) {
       console.error("Erro ao salvar os dados:", error);
@@ -127,10 +175,16 @@ const Profile: React.FC = () => {
     !isCpfValid ||
     !isPhoneValid;
 
-  const isButtonDisabledCompany = !isCNPJValid;
+  const isButtonDisabledPassword = !password || !passwordConfirm;
 
   return (
     <div className="flex">
+      <ToastComponent
+        show={showToast.show}
+        type={showToast.type}
+        message={showToast.message}
+        onClose={handleCloseToast}
+      />
       <div style={{ flex: "0 300px" }}>
         <NavbarComponent />
         <SidebarComponent />
@@ -141,98 +195,116 @@ const Profile: React.FC = () => {
           className="place-items-start pt-9"
         >
           <Tabs.Item title="Perfil" icon={HiUserCircle}>
-            <div>
-              <ProfileImageComponent
-                photo={photoProfile}
-                onChange={handleProfileImageChange}
-              />
+            <div
+              style={{
+                paddingRight: "calc(140vh - 0px)",
+                maxHeight: "calc(100vh - 160px)",
+                overflowY: "auto",
+              }}
+            >
               <div>
-                <Label htmlFor="name">Nome</Label>
-                <TextInput
-                  value={user.name}
-                  name="name"
-                  id="name"
-                  type="text"
-                  onChange={handleInputChange}
-                  className="mb-4"
+                <ProfileImageComponent
+                  photo={photoProfile}
+                  onChange={handleProfileImageChange}
                 />
-                <Label htmlFor="email">Email</Label>
-                <TextInput
-                  value={user.email}
-                  name="email"
-                  id="email"
-                  type="email"
-                  onChange={handleInputChange}
-                  className="mb-4"
-                />
-                <div className="mb-4">
-                  <Label htmlFor="cpf">CPF</Label>
-                  <InputCpfComponent
-                    value={user.cpf}
-                    onChange={handleCpfChange}
+                <div>
+                  <Label htmlFor="name">Nome</Label>
+                  <TextInput
+                    value={user.name}
+                    name="name"
+                    id="name"
+                    type="text"
+                    onChange={handleInputChange}
+                    className="mb-4"
                   />
-                </div>
-                <div className="mb-4">
-                  <Label htmlFor="phone">Telefone</Label>
-                  <InputPhoneComponent
-                    value={user.phone}
-                    onChange={handlePhoneChange}
+                  <Label htmlFor="email">Email</Label>
+                  <TextInput
+                    value={user.email}
+                    name="email"
+                    id="email"
+                    type="email"
+                    onChange={handleInputChange}
+                    className="mb-4"
                   />
-                </div>
-                <div style={{ display: "flex", justifyContent: "end" }}>
-                  <Button
-                    disabled={isButtonDisabledProfile}
-                    color="success"
-                    type="button"
-                    onClick={handleSave}
-                    size="md"
-                  >
-                    {isLoading ? <Spinner size="sm" /> : "Salvar"}
-                  </Button>
+                  <div className="mb-4">
+                    <Label htmlFor="cpf">CPF</Label>
+                    <InputCpfComponent
+                      value={user.cpf}
+                      onChange={handleCpfChange}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label htmlFor="phone">Telefone</Label>
+                    <InputPhoneComponent
+                      value={user.phone}
+                      onChange={handlePhoneChange}
+                    />
+                  </div>
+                  <Label htmlFor="login">Login</Label>
+                  <TextInput
+                    value={user.login}
+                    name="login"
+                    id="login"
+                    type="text"
+                    onChange={handleInputChange}
+                    className="mb-4"
+                  />
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    <Button
+                      disabled={isButtonDisabledProfile}
+                      color="success"
+                      type="button"
+                      onClick={handleSave}
+                      size="md"
+                    >
+                      {isLoading ? <Spinner size="sm" /> : "Salvar"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </Tabs.Item>
-          <Tabs.Item title="Minha empresa" icon={HiOfficeBuilding}>
+
+          <Tabs.Item title="Alterar senha" icon={HiLockClosed}>
             <div
-              style={{
-                maxHeight: "calc(100vh - 120px)",
-                overflowY: "auto",
-                paddingRight: "20px",
-              }}
+              style={{ maxHeight: "calc(100vh - 260px)", overflowY: "auto" }}
             >
               <div>
-                <Label htmlFor="fantasyName">Nome fantasia</Label>
-                <TextInput
-                  icon={HiUser}
-                  name="fantasyName"
-                  id="fantasyName"
-                  type="text"
-                  onChange={handleInputChange}
-                  className="mb-4"
-                />
-                <Label htmlFor="companyName">Razão social</Label>
-                <TextInput
-                  icon={HiBookmarkAlt}
-                  name="companyName"
-                  id="companyName"
-                  type="text"
-                  onChange={handleInputChange}
-                  className="mb-4"
-                />
-                <div className="mb-6">
-                  <Label htmlFor="cnpj">CNPJ</Label>
-                  <InputCNPJComponent
-                    value={user.cnpj}
-                    onChange={handleCNPJChange}
-                  />
+                <div>
+                  <div className="mb-2 block">
+                    <div className="mb-4">
+                      <InputPasswordComponent
+                        id="password"
+                        name="password"
+                        label="Senha"
+                        value={password}
+                        handleInputChange={handlePasswordChange}
+                      />
+                    </div>
+                    <div>
+                      <InputPasswordComponent
+                        id="passwordConfirm"
+                        name="passwordConfirm"
+                        label="Confirmação de senha"
+                        value={passwordConfirm}
+                        handleInputChange={handlePasswordChange}
+                        error={passwordConfirmError}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "end" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "end",
+                    marginTop: "19px",
+                  }}
+                >
                   <Button
-                    disabled={isButtonDisabledCompany}
+                    disabled={isButtonDisabledPassword}
                     color="success"
                     type="button"
-                    onClick={handleSave}
+                    onClick={handleSavePassword}
                     size="md"
                   >
                     {isLoading ? <Spinner size="sm" /> : "Salvar"}

@@ -14,16 +14,10 @@ const InputCpfComponent: React.FC<Props> = ({ value, onChange }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     const cleanedValue = inputValue.replace(/\D/g, "");
-    const isValid = isValidCPF(cleanedValue);
+    const isValid = cpf.isValid(cleanedValue);
 
     setError(!isValid);
     onChange(e.target.value, isValid);
-  };
-
-  const isValidCPF = (value: string) => {
-    if (/^(\d)\1{10}$/.test(value)) return false;
-
-    return cpf.isValid(value);
   };
 
   const formatCPF = (cpf: string): string => {

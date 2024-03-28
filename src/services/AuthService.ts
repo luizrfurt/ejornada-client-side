@@ -1,9 +1,9 @@
 import axiosInstance from "@/utils/AxiosInstance";
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (login: string, password: string) => {
   try {
     const response = await axiosInstance.post("/auth/login", {
-      email,
+      login,
       password,
     });
 
@@ -28,15 +28,21 @@ export const logoutUser = async () => {
 export const registerUser = async (
   name: string,
   email: string,
+  login: string,
   password: string,
-  passwordConfirm: string
+  passwordConfirm: string,
+  master: boolean,
+  leader: boolean
 ) => {
   try {
     const response = await axiosInstance.post("/auth/register", {
       name,
       email,
+      login,
       password,
       passwordConfirm,
+      master,
+      leader,
     });
 
     return response;

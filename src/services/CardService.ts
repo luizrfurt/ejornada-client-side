@@ -1,8 +1,8 @@
 import axiosInstance from "@/utils/AxiosInstance";
 
-export const cardData = async () => {
+export const getCards = async (userId: string) => {
   try {
-    const response = await axiosInstance.get("/cards");
+    const response = await axiosInstance.get(`/cards/${userId}`);
     return response.data.cards;
   } catch (error: any) {
     console.error("Erro: ", error);

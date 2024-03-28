@@ -17,7 +17,7 @@ const InputPasswordComponent: React.FC<Props> = ({
   label,
   value,
   handleInputChange,
-  error, 
+  error,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -35,13 +35,15 @@ const InputPasswordComponent: React.FC<Props> = ({
         type={showPassword ? "text" : "password"}
         placeholder=""
         onChange={handleInputChange}
-        className={`rounded-md focus:outline-none focus:ring ${
-          error ? 'border-red-500' : 'border-gray-300'
+        className={`rounded-md focus:-none focus:ring ${
+          error ? "border-red-500" : "border-gray-300"
         }`}
         required
       />
       {error && (
-        <span className="text-red-500 text-sm absolute top-full left-0">{error}</span>
+        <span className="text-red-500 text-sm absolute top-full left-0">
+          {error}
+        </span>
       )}
       <div
         className="absolute inset-y-0 right-0.5 flex items-center pr-3 cursor-pointer pt-5"

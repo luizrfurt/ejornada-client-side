@@ -1,28 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
+import NavbarComponent from '@/components/NavbarComponent';
 
-const test: React.FC = () => {
-  const data = [
-    ['Mês', 'Vendas'],
-    ['Janeiro', 1000],
-    ['Fevereiro', 1500],
-    ['Março', 1200],
-    ['Abril', 1300],
-    ['Maio', 1700],
-    ['Junho', 1400],
-  ];
+const ToastPage: React.FC = () => {
+  const [showToast, setShowToast] = useState(false);
 
-  const options = {
-    title: 'Vendas por mês',
-    hAxis: { title: 'Mês', titleTextStyle: { color: '#333' } },
-    vAxis: { minValue: 0 },
-    legend: { position: 'none' },
+  const toggleToast = () => {
+    setShowToast(!showToast);
+    if (!showToast) {
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
   };
 
   return (
     <div>
-      <h1>Seu gráfico de barras</h1>
+      <button onClick={toggleToast}>Toggle toast</button>
+      <NavbarComponent/>
     </div>
   );
 };
 
-export default test;
+export default ToastPage;

@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { emailConfirmVerifyToken } from "../../../../services/EmailConfirmService";
+import { emailConfirmVerify } from "../../../../services/EmailConfirmService";
 import { Button, Card, Spinner } from "flowbite-react";
-import { HiCheck, HiOutlineX } from "react-icons/hi";
+import { HiCheck, HiX } from "react-icons/hi";
 
 const ConfirmEmailPage = () => {
   const router = useRouter();
@@ -15,7 +15,7 @@ const ConfirmEmailPage = () => {
       const { token } = router.query;
       try {
         setLoading(true);
-        const result = await emailConfirmVerifyToken(token);
+        const result = await emailConfirmVerify(token);
         if (result.status === 200) {
           setConfirmedEmail(true);
         }
@@ -49,7 +49,7 @@ const ConfirmEmailPage = () => {
           </div>
         ) : (
           <div className="text-center">
-            <HiOutlineX className="text-red-500 text-5xl mx-auto mb-4" />
+            <HiX className="text-red-500 text-5xl mx-auto mb-4" />
             <p className="text-red-600">Link expirado ou já utilizado!</p>
           </div>
         )}

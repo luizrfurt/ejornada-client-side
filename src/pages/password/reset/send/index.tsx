@@ -1,25 +1,37 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { passwordResetVerifyToken, passwordReset } from "../../../../services/PasswordResetService";
+import {
+  passwordResetVerify,
+  passwordResetSend,
+} from "../../../../services/PasswordResetService";
 import { Button, Card, Label, Spinner, TextInput } from "flowbite-react";
 import { HiMail } from "react-icons/hi";
-import notifyMessage from "@/utils/NotifyMessage";
+import ToastComponent from "@/components/ToastComponent";
 
 const ResetPassword = () => {
   const router = useRouter();
+  const [emailSend, setEmailSend] = useState<string>("");
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [emailFound, setEmailFound] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showToast, setShowToast] = useState<{
+    show: boolean;
+    type: boolean;
+    message: string;
+  }>({ show: false, type: false, message: "" });
+
+  const handleCloseToast = () => {
+    setShowToast({ ...showToast, show: false });
+  };
 
   useEffect(() => {
     async function verifyToken() {
       const { token } = router.query;
       try {
         setLoading(true);
-        const result = await passwordResetVerifyToken(token);
+        const result = await passwordResetVerify(token);
         if (result.status === 200) {
-          setEmailFound(true);
+          //
         }
       } catch (error) {
         console.error("Erro ao mandar email:", error);
@@ -33,18 +45,29 @@ const ResetPassword = () => {
     }
   }, [router.query]);
 
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = async () => {
+  const handleClick = async () => {
     try {
       setIsLoading(true);
-      const response = await passwordReset();
+      const response = await passwordResetSend(emailSend);
       if (response.status !== 200) {
-        notifyMessage(0, response.data.message);
+        setShowToast({
+          show: true,
+          type: false,
+          message: response.data.message,
+        });
       } else {
-        notifyMessage(1, "Email de verificação reenviado com sucesso!");
+        setShowToast({
+          show: true,
+          type: true,
+          message: "Email de verificação reenviado com sucesso!",
+        });
       }
     } catch (error) {
-      console.error("Erro ao reenviar o email de verificação:", error);
-      notifyMessage(0, "Erro ao reenviar o email de verificação.");
+      setShowToast({
+        show: true,
+        type: false,
+        message: "Erro ao reenviar o email de verificação.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -58,6 +81,7 @@ const ResetPassword = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "email") {
+      setEmailSend(value); // Atualizar o estado emailSend
       setEmailError(
         value.trim() !== "" && !isValidEmail(value)
           ? "Por favor, insira um endereço de email válido."
@@ -66,10 +90,24 @@ const ResetPassword = () => {
     }
   };
 
-  const isButtonDisabled = !!emailError;
+  const handleBlurEmail = () => {
+    setEmailError(
+      emailSend.trim() !== "" && !isValidEmail(emailSend)
+        ? "Por favor, insira um endereço de email válido."
+        : null
+    );
+  };
+
+  const isButtonDisabled = !emailSend || !!emailError;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <ToastComponent
+        show={showToast.show}
+        type={showToast.type}
+        message={showToast.message}
+        onClose={handleCloseToast}
+      />
       <Card className="w-full max-w-md p-6">
         <div className="flex items-center justify-center mb-2">
           <img src="/img/logo.png" className="w-1/2" alt="Logo" />
@@ -84,7 +122,9 @@ const ResetPassword = () => {
             id="email"
             type="email"
             name="email"
+            value={emailSend}
             onChange={handleInputChange}
+            onBlur={handleBlurEmail}
             required
           />
           {emailError && (
@@ -96,17 +136,19 @@ const ResetPassword = () => {
             </span>
           )}
         </div>
-        <div>
+        <div className="flex justify-center">
           <Button
             color="success"
             href=""
             disabled={isButtonDisabled}
             type="button"
-            className="mt-3"
+            className="mt-3 mr-3"
             onClick={handleClick}
           >
-            {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
-            Enviar
+            {isLoading ? <Spinner size="sm" className="mr-2" /> : "Enviar"}
+          </Button>
+          <Button color="success" href="/" className="mt-3">
+            Voltar
           </Button>
         </div>
       </Card>

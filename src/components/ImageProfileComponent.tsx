@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { HiOutlineUpload, HiTrash } from "react-icons/hi";
+import { HiUpload, HiTrash } from "react-icons/hi";
 
 interface Props {
   photo: string;
@@ -10,7 +10,7 @@ interface Props {
   ) => void;
 }
 
-const ProfileImageComponent: React.FC<Props> = ({ photo, onChange }) => {
+const ImageProfileComponent: React.FC<Props> = ({ photo, onChange }) => {
   const [isPhotoChanged, setIsPhotoChanged] = useState<boolean>(false);
   const [isDefaultPhoto, setIsDefaultPhoto] = useState<boolean>(true);
   const [photoBase64String, setPhotoBase64String] = useState<string>("");
@@ -88,7 +88,7 @@ const ProfileImageComponent: React.FC<Props> = ({ photo, onChange }) => {
           }}
           onClick={handleUploadClick}
         >
-          <HiOutlineUpload />
+          <HiUpload />
         </button>
         {showDeleteButton && (
           <button
@@ -105,4 +105,4 @@ const ProfileImageComponent: React.FC<Props> = ({ photo, onChange }) => {
   );
 };
 
-export default ProfileImageComponent;
+export default ImageProfileComponent;

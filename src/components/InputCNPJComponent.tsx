@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { TextInput } from "flowbite-react";
-import { HiOutlineIdentification } from "react-icons/hi";
+import { HiIdentification } from "react-icons/hi";
+import { cnpj } from "cpf-cnpj-validator";
 
 interface Props {
   value: string;
@@ -14,40 +15,16 @@ const InputCnpjComponent: React.FC<Props> = ({ value, onChange }) => {
     const inputValue = e.target.value;
     const cleanedValue = inputValue.replace(/\D/g, "");
     const formattedCnpj = formatCnpj(cleanedValue);
-    const isValid = isValidCnpj(cleanedValue);
+    const isValid = cnpj.isValid(cleanedValue);
 
     setError(!isValid);
     onChange(formattedCnpj, isValid);
   };
-
-  const isValidCnpj = (value: string) => {
-    if (value.length !== 14) return false;
-    const cnpjNumbers = value.replace(/\D/g, "");
-    const weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    const sum = Array.from(cnpjNumbers.substr(0, 12)).reduce(
-      (acc, digit, index) => acc + parseInt(digit) * weights[index],
-      0
-    );
-    const remainder = sum % 11;
-    const firstDigit = remainder < 2 ? 0 : 11 - remainder;
-    const firstDigitValid = parseInt(cnpjNumbers.charAt(12)) === firstDigit;
-  
-    if (!firstDigitValid) return false;
-  
-    const newWeights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    const newSum = Array.from(cnpjNumbers.substr(0, 13)).reduce(
-      (acc, digit, index) => acc + parseInt(digit) * newWeights[index],
-      0
-    );
-    const newRemainder = newSum % 11;
-    const secondDigit = newRemainder < 2 ? 0 : 11 - newRemainder;
-    const secondDigitValid = parseInt(cnpjNumbers.charAt(13)) === secondDigit;
-  
-    return secondDigitValid;
-  };
-  
   
   const formatCnpj = (cnpj: string): string => {
+    if (!cnpj) {
+      return '';
+    }
     return cnpj
       .replace(/\D/g, "")
       .slice(0, 14)
@@ -56,11 +33,11 @@ const InputCnpjComponent: React.FC<Props> = ({ value, onChange }) => {
       .replace(/(\d{3})(\d)/, "$1/$2")
       .replace(/(\d{4})(\d{1,2})/, "$1-$2");
   };
-
+  
   return (
     <div style={{ position: "relative" }}>
       <TextInput
-        icon={HiOutlineIdentification}
+        icon={HiIdentification}
         type="text"
         value={formatCnpj(value)}
         onChange={handleChange}

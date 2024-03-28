@@ -5,8 +5,7 @@ import { Button, Card, Label, Spinner, TextInput } from "flowbite-react";
 import Link from "next/link";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import notifyMessage from "@/utils/NotifyMessage";
-import { HiMail, HiOutlineUserCircle } from "react-icons/hi";
+import { HiMail, HiUserCircle } from "react-icons/hi";
 import InputPasswordComponent from "@/components/InputPasswordComponent";
 
 const Register: React.FC = () => {
@@ -14,31 +13,52 @@ const Register: React.FC = () => {
   const [registerData, setRegisterData] = useState({
     name: "",
     email: "",
+    login: "",
     password: "",
     passwordConfirm: "",
+    master: true,
+    leader: true,
   });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordConfirmError, setPasswordConfirmError] = useState<string>("");
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showToast, setShowToast] = useState<{
+    show: boolean;
+    type: boolean;
+    message: string;
+  }>({ show: false, type: false, message: "" });
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+  const isValidLogin = (login: string): boolean => {
+    return login.length >= 8;
+  };
+
   const handleLogin = async () => {
     try {
       if (emailError) {
-        notifyMessage(0, "Por favor, insira um endereço de email válido.");
+        setShowToast({
+          show: true,
+          type: true,
+          message: "Por favor, insira um endereço de email válido.",
+        });
         return;
       }
       const response = await loginUser(
-        registerData.email,
+        registerData.login,
         registerData.password
       );
 
       if (response.status !== 200) {
-        notifyMessage(0, response.data.message);
+        setShowToast({
+          show: true,
+          type: false,
+          message: response.data.message
+        });
       } else {
         router.push("/home");
       }
@@ -56,12 +76,19 @@ const Register: React.FC = () => {
       const response = await registerUser(
         registerData.name,
         registerData.email,
+        registerData.login,
         registerData.password,
-        registerData.passwordConfirm
+        registerData.passwordConfirm,
+        registerData.master,
+        registerData.leader,
       );
 
       if (response.status !== 201) {
-        notifyMessage(0, response.data.message);
+        setShowToast({
+          show: true,
+          type: false,
+          message: response.data.message,
+        });
       } else {
         handleLogin();
       }
@@ -98,9 +125,18 @@ const Register: React.FC = () => {
     );
   };
 
+  const handleBlurLogin = () => {
+    setLoginError(
+      registerData.login.trim() !== "" && !isValidLogin(registerData.login)
+        ? "Login deve conter pelo menos 8 caracteres."
+        : null
+    );
+  };
+
   const isButtonDisabled =
     !registerData.name ||
     !registerData.email ||
+    !registerData.login ||
     !registerData.password ||
     !registerData.passwordConfirm ||
     !!emailError ||
@@ -117,7 +153,7 @@ const Register: React.FC = () => {
           <div className="mb-2 block">
             <Label htmlFor="name" value="Nome" />
             <TextInput
-              icon={HiOutlineUserCircle}
+              icon={HiUserCircle}
               id="name"
               type="text"
               name="name"
@@ -145,6 +181,26 @@ const Register: React.FC = () => {
               >
                 {emailError}
               </span>
+            )}
+          </div>
+
+          <div className="mb-2 block">
+            <Label htmlFor="login" value="Login" />
+            <TextInput
+              icon={HiMail}
+              id="login"
+              type="login"
+              name="login"
+              value={registerData.login}
+              onChange={handleInputChange}
+              onBlur={handleBlurLogin}
+              required
+              shadow
+              minLength={8}
+              maxLength={32}
+            />
+            {loginError && (
+              <span className="text-red-500 text-sm">{loginError}</span>
             )}
           </div>
 

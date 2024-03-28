@@ -1,33 +1,62 @@
-import React from 'react';
+import React from "react";
 import NavbarComponent from "../../components/NavbarComponent";
-import SidebarComponent from "@/components/SideBarComponent";
-import GraficoComponent from '@/components/GraficoComponent';
+import SidebarComponent from "@/components/SidebarComponent";
+import GraficoComponent from "@/components/ChartComponent";
 
 const Home: React.FC = () => {
+  // TIPOS DE GRAFICOS
+  // GeoChart    AreaChart  ScatterChart  Table
+  // Histogram   BarChart   ColumnChart   ComboChart
+  // Bar         PieChart   Scatter
 
-  const data = [
-    ['Mês', 'Vendas'],
-    ['Janeiro', 1000],
-    ['Fevereiro', 1500],
-    ['Março', 1200],
-    ['Abril', 1300],
-    ['Maio', 1700],
-    ['Junho', 1400],
+  const bar = [
+    ["Mês", "Vendas"],
+    ["Janeiro", 1000],
+    ["Fevereiro", 1500],
+    ["Março", 1200],
+    ["Abril", 1300],
+    ["Maio", 1700],
+    ["Junho", 1400],
+  ];
+
+  const barOptions = {
+    title: "Vendas por mês",
+    hAxis: { title: "Mês", titleTextStyle: { color: "#333" } },
+    vAxis: { minValue: 0 },
+    legend: { position: "none" },
+  };
+
+  const monthSales = [
+    ["Mês", "Vendas"],
+    ["Janeiro", 1000],
+    ["Fevereiro", 1500],
+    ["Março", 1200],
+    ["Abril", 1300],
+    ["Maio", 1700],
+    ["Junho", 1400],
   ];
 
   const options = {
-    title: 'Vendas por mês',
-    hAxis: { title: 'Mês', titleTextStyle: { color: '#333' } },
+    title: "Vendas por mês",
+    hAxis: { title: "Mês", titleTextStyle: { color: "#333" } },
     vAxis: { minValue: 0 },
-    legend: { position: 'none' },
+    legend: { position: "none" },
   };
 
   return (
     <div>
       <NavbarComponent />
       <SidebarComponent />
-      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '45px' }}>
-        <GraficoComponent data={data} options={options} />
+      <div
+        style={{
+          marginTop: "40px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          paddingTop: "45px",
+        }}
+      >
+        <GraficoComponent data={bar} options={barOptions} type="Bar" />
       </div>
     </div>
   );

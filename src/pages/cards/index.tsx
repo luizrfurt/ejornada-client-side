@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import NavbarComponent from "@/components/NavbarComponent";
-import SideBarComponent from "@/components/SideBarComponent";
-import { cardData } from "@/services/CardService";
+import SidebarComponent from "@/components/SidebarComponent";
+import { getCards } from "@/services/CardService";
 import { Spinner } from "flowbite-react";
+import { userData } from "@/services/UserService";
 
 interface CardData {
   id: string;
@@ -21,16 +22,47 @@ interface CardData {
 }
 
 const Cards = () => {
+  const [user, setUser] = useState({
+    id: "",
+    name: "",
+    email: "",
+    cpf: "",
+    phone: "",
+    login: "",
+    photo: "",
+    master: false,
+    leader: false,
+  });
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    loadData();
+    handleMe();
+    handleGetCards();
   }, []);
 
-  const loadData = async () => {
+  const handleMe = async () => {
     try {
-      const response = await cardData();
+      const response = await userData();
+      setUser({
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        cpf: response.cpf,
+        phone: response.phone,
+        master: response.master,
+        photo: response.photo,
+        login: response.login,
+        leader: response.leader,
+      });
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  const handleGetCards = async () => {
+    try {
+      const response = await getCards(user.id);
       if (Array.isArray(response)) {
         setCards(response);
       } else {
@@ -47,9 +79,9 @@ const Cards = () => {
     <div>
       <NavbarComponent />
       <div className="max-w-screen-lg mx-auto overflow-hidden flex justify-center">
-        <SideBarComponent />
+        <SidebarComponent />
         <div className="mt-8 ml-auto pl-16">
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <div className="overflow-x-auto shadow-md sm:rounded-lg">
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm text-gray-500 dark:text-gray-400 border border-gray-300 rounded-lg mt-8">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
